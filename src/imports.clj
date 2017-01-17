@@ -16,20 +16,7 @@
 (defn ui-out [& r]
   (apply println r))
 
-;(load "definitions(1c)")
 
-;;Test commands - planner
-;---move
-;(planner world '(on prisoner j2) planner-operations-prisoner)
-;(planner world '(on prisoner j7) planner-operations-prisoner)
-;---goal state
-;(planner world '(escaped prisoner true) planner-operations-prisoner)
+;;Examples of sentences to parse
 
-;(get (ops-search world '((escaped prisoner true)) operations-prisoner) :cmds)
-
-;(load "imports")
-;(startup 2222)
-;(map nlogo-send-exec (map nlogo-translate-cmd (get (ops-search world (quote ((escaped prisoner true))) operations-prisoner) :cmds)))
-
-;(time (ops-search world (quote ((escaped prisoner true))) operations-prisoner))
-;(nlogo-send-exec (ops-search world (quote ((escaped prisoner true))) operations-prisoner))
+;;(shrep-1 '(move the pris to H))
