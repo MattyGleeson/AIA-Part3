@@ -8,6 +8,9 @@
   {
     :search-type :breadth-first
     ;:search-type :strips
+
+   :world-type world
+   ;:world-type nlogoworld
    })
 
 
@@ -272,22 +275,23 @@
 
 
 (defmatch process-cmd []
-  ((grasp ?x)        :=> (set-atom! it-reference (? x))   (goal (mout '(holds ?x))))
-  ((put-on ?x ?y)    :=> (set-atom! it-reference (? x))   (goal (mout '(on ?x ?y))))
-  ((put-at ?x ?s)    :=> (set-atom! it-reference (? x))   (goal (mout '(at ?x ?s))))
-  ((move-hand-to ?s) :=> (apply-exec ('puton exec-ops) (mout '{s ?s})))
-  ((create ?x ?spec) :=>
-    (goal '(hand empty))
-    (set-atom! it-reference (? x))
-    (apply-exec ('create exec-ops)
-      (conj {'x (? x)}
-        (merge default-block-spec
-          (extract-to-map (? spec))))))
-  ((destroy ?x)      :=>
-    (goal (mout '(holds ?x)))
-    (apply-exec ('dispose exec-ops))
-    (set-atom! it-reference false))
-  ((reset)         :=> (clear-block-data) (nlogo-send "setup"))
+  ;((grasp ?x)        :=> (set-atom! it-reference (? x))   (goal (mout '(holds ?x))))
+  ;((put-on ?x ?y)    :=> (set-atom! it-reference (? x))   (goal (mout '(on ?x ?y))))
+  ;((put-at ?x ?s)    :=> (set-atom! it-reference (? x))   (goal (mout '(at ?x ?s))))
+  ;((move-hand-to ?s) :=> (apply-exec ('puton exec-ops) (mout '{s ?s})))
+  ((move-to ?x ?y) :=> (set-atom! it-reference (? x)) (goal (mout '(on ?x ?y))))
+  ;((create ?x ?spec) :=>
+  ;  (goal '(hand empty))
+  ;  (set-atom! it-reference (? x))
+  ;  (apply-exec ('create exec-ops)
+  ;    (conj {'x (? x)}
+  ;      (merge default-block-spec
+  ;        (extract-to-map (? spec))))))
+  ;((destroy ?x)      :=>
+  ;  (goal (mout '(holds ?x)))
+  ;  (apply-exec ('dispose exec-ops))
+  ;  (set-atom! it-reference false))
+  ;((reset)         :=> (clear-block-data) (nlogo-send "setup"))
   ; ( ?x             :=> (ui-out :dbg 'ERROR '(unknown NetLogo request) (? x)))
   )
 
@@ -298,23 +302,23 @@
 ;================================
 
 
-(let [sizes '{small 5, med 7, large 9}
-      sp    " "
-      qt    "\""
-      str-qt   (fn[x] (str " \"" x "\" "))    ; wrap x in quotes
-      stack-no (fn[x] (apply str (rest (str x))))   ; strip "s" of stack name
-      ]
+;(let [sizes '{small 5, med 7, large 9}
+;      sp    " "
+;      qt    "\""
+;      str-qt   (fn[x] (str " \"" x "\" "))    ; wrap x in quotes
+;      stack-no (fn[x] (apply str (rest (str x))))   ; strip "s" of stack name
+;      ]
 
 
-  (defmatch nlogo-translate-cmd []
-    ((make ?nam ?obj ?size ?color)
-                    :=> (str 'exec.make (str-qt (? nam)) (str-qt (? obj))
-                                        ((? size) sizes) (str-qt (? color))))
-    ((move-to ?s)   :=> (str 'exec.move-to sp (stack-no (? s))))
-    ((drop-at ?s)   :=> (str 'exec.drop-at sp (stack-no (? s))))
-    ((pick-from ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
-    ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
-    ))
+  ;(defmatch nlogo-translate-cmd []
+  ;  ((make ?nam ?obj ?size ?color)
+  ;                  :=> (str 'exec.make (str-qt (? nam)) (str-qt (? obj))
+  ;                                      ((? size) sizes) (str-qt (? color))))
+  ;  ((move-to ?s)   :=> (str 'exec.move-to sp (stack-no (? s))))
+  ;  ((drop-at ?s)   :=> (str 'exec.drop-at sp (stack-no (? s))))
+  ;  ((pick-from ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
+  ;  ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
+  ;  ))
 
 
 

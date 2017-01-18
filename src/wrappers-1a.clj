@@ -118,7 +118,7 @@
   [& r]
   (if-not win-mode (apply println r)
     (let [[win & r] r]
-      (.setText (win @uiwin) (write r :stream nil))
+      ;(.setText (win @uiwin) (write r :stream nil))
       )))
 
 
@@ -200,6 +200,7 @@
 
 (defn nlogo-send-exec [cmd-list]
   ; (ui-out :comm 'NL==> cmd-list)
+  (print :cmd-list cmd-list)
   (let [cmd-str (nlogo-translate-cmd cmd-list)]
     (ui-out :comm 'NL==> cmd-list "   \t" cmd-str)
     ; (ui-out :comm "     " cmd-str)

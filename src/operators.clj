@@ -19,57 +19,41 @@
 ;;----------------
 (def operations-prisoner
   '{
-    move-to-junction  {:pre ((moving prisoner ?corridor)
-                              (connects ?corridor ?junction)
-                              )
-                       :add ((on prisoner ?junction))
-                       :del ((moving prisoner ?corridor))
-                       :txt (prisoner moved from ?corridor to ?junction)
-                       :cmd [move-junction ?junction]
+    move              {
+                       :pre ((on pris ?p1)
+                              (connects ?p1 ?p2)
+                              (watched ?p2 false)
+                              (is cell unlocked))
+                       :add ((on pris ?p2))
+                       :del ((on pris ?p1))
+                       :txt (prisoner moved from ?p1 to ?p2)
+                       :cmd [move-junction ?p2]
                        }
-    move-to-corridoor {:pre ((on prisoner ?junction)
-                              (connects ?junction ?corridor)
-                              (watched ?corridor false)
+    unlock            {:pre ((on pris cell)
+                              (is cell locked)
                               )
-                       :add ((moving prisoner ?corridor))
-                       :del ((on prisoner ?junction))
-                       :txt (prisoner moved from ?junction to ?corridor)
-                       :cmd [blank]
-                       }
-    unlock            {:pre ((at prisoner c)
-                              (is c locked)
-                              )
-                       :add ((is c unlocked))
-                       :del ((is c locked))
+                       :add ((is cell unlocked))
+                       :del ((is cell locked))
                        :txt (unlocked cell)
                        :cmd [unlock-cell]
                        }
-    leave-cell        {:pre ((at prisoner c)
-                              (is c unlocked)
-                              (connects c ?junction)
-                              )
-                       :add ((on prisoner ?junction))
-                       :del ((at prisoner c))
-                       :txt (leave cell)
-                       :cmd [move-junction ?junction]
-                       }
-    get-key           {:pre ((on prisoner ?junction)
+    get-key           {:pre ((on pris ?junction)
                               (at ?guard ?junction)
                               (has ?guard key)
                               )
-                       :add ((has prisoner key))
+                       :add ((has pris key))
                        :del ((has ?guard key))
-                       :txt (key twoked)
+                       :txt (key found at ?junction)
                        :cmd [get-key]
                        }
-    exit              {:pre ((has prisoner key)
-                              (on prisoner ?junction)
+    exit              {:pre ((has pris key)
+                              (on pris ?junction)
                               (is ?junction exit)
-                              (escaped prisoner false)
+                              (escaped pris false)
                               )
-                       :add ((escaped prisoner true))
-                       :del ((escaped prisoner false))
-                       :txt (get ops-searched m8)
+                       :add ((escaped pris true))
+                       :del ((escaped pris false))
+                       :txt (prisoner escaped)
                        :cmd [exit-prison]                   ;changed from exit to exit-prison. scared of conflicts
                        }
     })

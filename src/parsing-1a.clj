@@ -26,59 +26,33 @@
 
 (def lexicon
   '{
-    guard {:cat noun, :sem (isa ?p guard)}
-    prisoner {:cat noun, :sem (isa ?p prisoner)}
-    exit {:cat noun, :sem (isa ?p exit)}
-    location {:cat noun, :sem (isa ?p location)}
+    guard     {:cat noun, :sem (isa ?x guard)}
+    prisoner  {:cat noun, :sem (isa ?x prisoner)}
+    exit      {:cat noun, :sem (isa ?x exit)}
+    location  {:cat noun, :sem (isa ?x location)}
 
-
-    ;blue   {:cat adj, :sem (color ?x blue)}
-    ;red    {:cat adj, :sem (color ?x red)}
-    ;green  {:cat adj, :sem (color ?x green)}
-    ;grey   {:cat adj, :sem (color ?x grey)}
-    ;orange {:cat adj, :sem (color ?x orange)}
-    ;brown  {:cat adj, :sem (color ?x brown)}
-    ;yellow {:cat adj, :sem (color ?x yellow)}
-    ;pink   {:cat adj, :sem (color ?x pink)}
-    ;
-    ;large {:cat adj, :sem (size ?x large)}
-    ;small {:cat adj, :sem (size ?x small)}
-    ;
-    ;block {:cat noun, :sem (isa ?x cube)}
-    ;box   {:cat noun, :sem (isa ?x cube)}
-    ;brick {:cat noun, :sem (isa ?x cube)}
-    ;cube  {:cat noun, :sem (isa ?x cube)}
-    ;
-    ;sphere {:cat noun, :sem (isa ?x sphere)}
-    ;circle {:cat noun, :sem (isa ?x sphere)}
-    ;ball   {:cat noun, :sem (isa ?x sphere)}
-    ;
-    ;thing  {:cat noun, :sem (isa ?x ?_)}
-    ;
-    ;pyramid   {:cat noun, :sem (isa ?x pyramid)}
-    ;triangle  {:cat noun, :sem (isa ?x pyramid)}
 
     the    {:cat det} ;, :sem undef}
-    a      {:cat det} ;, :sem undef}
-    an     {:cat det}
-    any    {:cat det}
+    ;a      {:cat det} ;, :sem undef}
+    ;an     {:cat det}
+    ;any    {:cat det}
 
-    on      {:cat prep, :sem (on ?y ?x)}
+    ;on      {:cat prep, :sem (on ?y ?x)}
     to      {:cat prep, :sem (on ?y ?x)}
-    under   {:cat prep, :sem (on ?x ?y)}
+    ;under   {:cat prep, :sem (on ?x ?y)}
 
-    grasp   {:cat verb1, :arity 1, :sem grasp}
-    find    {:cat verb1, :arity 1, :sem grasp}
+    ;grasp   {:cat verb1, :arity 1, :sem grasp}
+    ;find    {:cat verb1, :arity 1, :sem grasp}
+    ;
+    ;remove  {:cat verb1, :arity 1, :sem destroy}
+    ;destroy {:cat verb1, :arity 1, :sem destroy}
+    ;
+    ;make    {:cat make, :arity 1, :sem make}
+    ;create  {:cat make, :arity 1, :sem make}
 
-    remove  {:cat verb1, :arity 1, :sem destroy}
-    destroy {:cat verb1, :arity 1, :sem destroy}
-
-    make    {:cat make, :arity 1, :sem make}
-    create  {:cat make, :arity 1, :sem make}
-
-    place   {:cat put2, :arity 2, :sem put-on}
+    ;place   {:cat put2, :arity 2, :sem put-on}
     move    {:cat put2, :arity 2, :sem put-on}
-    put     {:cat put2, :arity 2, :sem put-on}
+    ;put     {:cat put2, :arity 2, :sem put-on}
     })
 
 
@@ -103,8 +77,8 @@
 
 ;___ world context predicates ______________
 
-(defn stack? [x] (mfind [`(~'stack ~x) @block-data] true))
-(defn block? [x] (mfind [`(~'isa ~x ~'?_) @block-data] true))
+(defn stack? [x] (mfind [`(~'stack ~x) (:world-type settings)] true))
+(defn block? [x] (mfind [`(~'isa ~x ~'?_) (:world-type settings)] true))
 
 (defn id-type? [x]    (and (map? x) (= (:type x) 'id)))
 (defn tuple-type? [x] (and (map? x) (= (:type x) 'tuples)))
@@ -173,23 +147,34 @@
 ; this is the top level phrase
 
 (defmatch parse []
-  ;(((-> ?cmd verb1?) (-> ??obj noun-phrase))
-  ;  :=> (list (? cmd) (? obj))
-  ;  )
-  ;(((-> ?cmd make?) (-> ??obj noun-group))
-  ;  :=> (let [obj (? obj)
-  ;            id  (gen-block-name)
-  ;            ]
-  ;        (list 'create id
-  ;          (edit (:id obj) id (:sem obj))))
-  ;  )
-  (((-> ?cmd put2?) (-> ??obj noun-phrase) to (-> ?s stack?))
-    :=> (list 'put-at (? obj) (? s))
-    )
-  (((-> ?cmd put2?) (-> ??obj1 noun-phrase) to (-> ??obj2 noun-phrase))
-    :=> (list (? cmd) (? obj1) (? obj2))
-    )
-  )
+          ;
+          (((-> ?cmd verb1?) (-> ??obj noun-phrase))
+            :=> (list (? cmd) (? obj))
+            )
+          (((-> ?cmd make?) (-> ??obj noun-group))
+            :=> (let [obj (? obj)
+                      id  (gen-block-name)
+                      ]
+                  (list 'create id
+                        (edit (:id obj) id (:sem obj))))
+            )
+
+
+
+          ;(((-> ?cmd put2?) (-> ??obj noun)))
+
+          ;(((-> ?cmd put2?) the (-> ?obj noun-phrase) to (-> ?s block?))
+          ;  :=> (list 'move-to (? obj) (? s))
+          ;  )
+
+          (((-> ?cmd put2?) the (-> ?obj block?) to (-> ?s block?))
+            :=> (list 'move-to (? obj) (? s))
+            )
+
+          (((-> ?cmd put2?) (-> ??obj1 noun-phrase) to (-> ??obj2 noun-phrase))
+            :=> (list (? cmd) (? obj1) (? obj2))
+            )
+          )
 
 
 
@@ -306,7 +291,7 @@
     (do (ui-out :comm 'found (:sem spec))
       (:sem spec))
     (let [vnam (symbol (subs (str (:id spec)) 1))  ;; strip-off "?"
-          obj (mfind* [(:sem spec) @block-data] (get mvars vnam))
+          obj (mfind* [(:sem spec) (:world-type settings)] (get mvars vnam))
           ]
       (ui-out :comm 'found obj)
       (if (nil? obj) (throw (Exception. (str "whoops- I cannot find a " spec))))
@@ -317,7 +302,7 @@
   (map #(if (map? %) (find-obj %) %) spec))
 
 (defn check [tuples text]
-  (or (mfind* [tuples @block-data] true)
+  (or (mfind* [tuples (:world-type settings)] true)
     (do (ui-out :comm 'mishap text)
       false
       )))
@@ -336,11 +321,11 @@
 
 (defn apply-exec
   "like apply-op but uses selected matcher bindings & implicitly
-    applies to @block-data"
+    applies to (:world-type settings)"
   ([op] (apply-exec op {}))
   ([op bind]
     (with-mvars bind
-      (mfind* [(:pre op) @block-data]
+      (mfind* [(:pre op) (:world-type settings)]
         (let [op (mout op)]
           (bd-del! (:del op))
           (bd-add! (:add op))
@@ -354,14 +339,14 @@
 (defn goal [g]
   (ui-out :dbg 'goal g)
   (ui-out :dbg (list g))
-  (ui-out @block-data)
+  (ui-out (:world-type settings))
   (let [smap
         (cond
           (= (:search-type settings) :breadth-first)
-          (ops-search @block-data (list g) operations-prisoner)
+          (ops-search (:world-type settings) (list g) operations-prisoner)
 
-          (= (:search-type settings) :strips)
-          (strips-solver @block-data g goal-ops)
+          ;(= (:search-type settings) :strips)
+          ;(strips-solver (:world-type settings) g goal-ops)
 
           :else
           (throw (new RuntimeException "unknown search type in settings"))
@@ -381,14 +366,14 @@
       (doseq [c (:cmds smap)]
         (nlogo-send-exec c))
       (bd-set! (:state smap))
-      (ui-set :bdat @block-data)
+      (ui-set :bdat (:world-type settings))
       )
     )))
 
 
 ;(defn goal [g]
 ;  (ui-out :dbg 'goal g)
-;  (if-let [smap (ops-search @block-data (list g) block-ops)]
+;  (if-let [smap (ops-search (:world-type settings) (list g) block-ops)]
 ;    (do
 ;      (ui-out :dbg 'solved...)
 ;      ; (ui-out :dbg smap)
@@ -397,7 +382,7 @@
 ;      (doseq [c (:cmds smap)]
 ;        (nlogo-send-exec c))
 ;      (bd-set! (:state smap))
-;      (ui-set :bdat @block-data)
+;      (ui-set :bdat (:world-type settings))
 ;      )
 ;    ; else - search failed
 ;    (do (ui-out :dbg "Help! - I cannot find a way to do this")
@@ -454,35 +439,35 @@
   )
 
 
-(def block-data (atom #{}))
+;(def block-data (atom #{}))
 
 (defn bd-set! [data]
   (set-atom! block-data data))
 
 (defn bd-add! [tuples]
-  (set-atom! block-data (union @block-data (set tuples)))
+  (set-atom! block-data (union (:world-type settings) (set tuples)))
   )
 
 (defn bd-del! [tuples]
-  (set-atom! block-data (difference @block-data (set tuples))))
+  (set-atom! block-data (difference (:world-type settings) (set tuples))))
 
 
 (defn clear-block-data []
   (reset-block-numbering)
   (ui-out :dbg 'resetting 'block-data)
-  (set-atom! block-data #{})
-  (bd-add! (gen-stack-tuples (gen-stack-names no-stacks)))
-  (bd-add! '#{(hand empty)})
-  (ui-set :bdat @block-data)
-  @block-data
+  (set-atom! (:world-type settings) #{})
+  ;(bd-add! (gen-stack-tuples (gen-stack-names no-stacks)))
+  ;(bd-add! '#{(hand empty)})
+  (ui-set :bdat (:world-type settings))
+  (:world-type settings)
   )
 
 
 (defn get-held []
-  (mfind ['(holds ?x) @block-data] (? x)))
+  (mfind ['(holds ?x) (:world-type settings)] (? x)))
 
 
-(defn pbd [] (pprint @block-data))
+(defn pbd [] (pprint (:world-type settings)))
 
 
 ;================================
@@ -506,7 +491,7 @@
         (ui-out :comm 'cmd cmd)
         (ui-out :dbg 'processing...)
         (process-cmd cmd)
-        (ui-set :bdat @block-data))
+        (ui-set :bdat (:world-type settings)))
       ;true
       )
     ;else
@@ -527,7 +512,6 @@
         (do (shrep-1 in-list)
           (recur))
       ))))
-
 
 (defn shrep-1 [in-list]
   (ui-broadcast "_________________\n")

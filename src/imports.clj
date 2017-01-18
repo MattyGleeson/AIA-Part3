@@ -1,7 +1,9 @@
+(defn ui-out [& r]
+  (apply println r))
 
 (load "matcher(0.0m)")
 (load "ops-search(1b)")
-(load "strips-search-1a")
+;(load "strips-search-1a")
 (load "socket")
 (load "operators")
 (load "world")
