@@ -26,33 +26,31 @@
 
 (def lexicon
   '{
-    guard     {:cat noun, :sem (isa ?x guard)}
+    guard {:cat noun, :sem (isa ?p guard)}
     prisoner  {:cat noun, :sem (isa ?x prisoner)}
     exit      {:cat noun, :sem (isa ?x exit)}
     location  {:cat noun, :sem (isa ?x location)}
 
-
     the    {:cat det} ;, :sem undef}
-    ;a      {:cat det} ;, :sem undef}
-    ;an     {:cat det}
-    ;any    {:cat det}
+    a      {:cat det} ;, :sem undef}
+    an     {:cat det}
+    any    {:cat det}
 
-    ;on      {:cat prep, :sem (on ?y ?x)}
-    to      {:cat prep, :sem (on ?y ?x)}
-    ;under   {:cat prep, :sem (on ?x ?y)}
+    on      {:cat prep, :sem (on ?y ?x)}
+    under   {:cat prep, :sem (on ?x ?y)}
 
-    ;grasp   {:cat verb1, :arity 1, :sem grasp}
-    ;find    {:cat verb1, :arity 1, :sem grasp}
-    ;
-    ;remove  {:cat verb1, :arity 1, :sem destroy}
-    ;destroy {:cat verb1, :arity 1, :sem destroy}
-    ;
-    ;make    {:cat make, :arity 1, :sem make}
-    ;create  {:cat make, :arity 1, :sem make}
+    grasp   {:cat verb1, :arity 1, :sem grasp}
+    find    {:cat verb1, :arity 1, :sem grasp}
 
-    ;place   {:cat put2, :arity 2, :sem put-on}
+    remove  {:cat verb1, :arity 1, :sem destroy}
+    destroy {:cat verb1, :arity 1, :sem destroy}
+
+    make    {:cat make, :arity 1, :sem make}
+    create  {:cat make, :arity 1, :sem make}
+
+    place   {:cat put2, :arity 2, :sem put-on}
     move    {:cat put2, :arity 2, :sem put-on}
-    ;put     {:cat put2, :arity 2, :sem put-on}
+    put     {:cat put2, :arity 2, :sem put-on}
     })
 
 
@@ -77,8 +75,8 @@
 
 ;___ world context predicates ______________
 
-(defn stack? [x] (mfind [`(~'stack ~x) (:world-type settings)] true))
-(defn block? [x] (mfind [`(~'isa ~x ~'?_) (:world-type settings)] true))
+(defn stack? [x] (mfind [`(~'stack ~x) @block-data] true))
+(defn block? [x] (mfind [`(~'isa ~x ~'?_) @block-data] true))
 
 (defn id-type? [x]    (and (map? x) (= (:type x) 'id)))
 (defn tuple-type? [x] (and (map? x) (= (:type x) 'tuples)))
@@ -88,20 +86,20 @@
 ;___ noun group ___________________________
 
 (defmatch noun-group []
-  (((-> ?d det?) (-> ?n noun?))       ; NG -> Det N
-    :=> {:cat  'ng
-         :id   '?x,    ; by default
-         :type 'tuples
-         :sem  (list (? n))
-         }
-    )
-  (((-> ?d det?) (-> ??a adjG) (-> ?n noun?))    ; NG -> Det AdjG N
-    :=> {:cat  'ng
-         :id   '?x,    ; by default
-         :type 'tuples
-         :sem  (mout '(??a ?n))
-         }
-    ))
+          (((-> ?d det?) (-> ?n noun?))       ; NG -> Det N
+            :=> {:cat  'ng
+                 :id   '?x,    ; by default
+                 :type 'tuples
+                 :sem  (list (? n))
+                 }
+            )
+          (((-> ?d det?) (-> ??a adjG) (-> ?n noun?))    ; NG -> Det AdjG N
+            :=> {:cat  'ng
+                 :id   '?x,    ; by default
+                 :type 'tuples
+                 :sem  (mout '(??a ?n))
+                 }
+            ))
 
 
 
@@ -109,37 +107,37 @@
 
 (defn adjG [lis]                   ; AdjG -> *Adj
   (and (every? #(adj? %) lis)
-    (map #(adj? %) lis)
-    ))
+       (map #(adj? %) lis)
+       ))
 
 
 ;___ noun phrase ___________________________
 
 (defmatch noun-phrase []
-  (((-> ??np noun-group)) :=> (assoc (? np) :cat 'np))   ; NP -> NG
-  (((-> ?obj block?))                                    ; NP -> block
-    :=> {:cat 'np, :type 'id :sem  (? obj)}
-    )
-  (((-> ?obj #(= % 'it)))                 ; NP -> block
-    :=> {:cat 'np, :type 'id :sem @it-reference}
-    )
-  (((-> ??np noun-group) (-> ??pp prep-phrase))          ; NP -> NG PP
-    :=> (let [sym (gensym 'x)]
-          {:id   '?x
-           :cat  'np
-           :type 'tuples
-           :sem  (concat (:sem (? np)) (:sem (? pp)))
-           }))
-  )
+          (((-> ??np noun-group)) :=> (assoc (? np) :cat 'np))   ; NP -> NG
+          (((-> ?obj block?))                                    ; NP -> block
+            :=> {:cat 'np, :type 'id :sem  (? obj)}
+            )
+          (((-> ?obj #(= % 'it)))                 ; NP -> block
+            :=> {:cat 'np, :type 'id :sem @it-reference}
+            )
+          (((-> ??np noun-group) (-> ??pp prep-phrase))          ; NP -> NG PP
+            :=> (let [sym (gensym 'x)]
+                  {:id   '?x
+                   :cat  'np
+                   :type 'tuples
+                   :sem  (concat (:sem (? np)) (:sem (? pp)))
+                   }))
+          )
 
 
 
 ;___ prep phrase ___________________________
 
 (defmatch prep-phrase []
-  (((-> ?prep prep?) (-> ??np noun-phrase))             ; PP -> Prep NP
-    :=> (pnp-sems (? prep) (? np))
-    ))
+          (((-> ?prep prep?) (-> ??np noun-phrase))             ; PP -> Prep NP
+            :=> (pnp-sems (? prep) (? np))
+            ))
 
 
 
@@ -147,7 +145,6 @@
 ; this is the top level phrase
 
 (defmatch parse []
-          ;
           (((-> ?cmd verb1?) (-> ??obj noun-phrase))
             :=> (list (? cmd) (? obj))
             )
@@ -159,19 +156,14 @@
                         (edit (:id obj) id (:sem obj))))
             )
 
-
-
-          ;(((-> ?cmd put2?) (-> ??obj noun)))
-
-          ;(((-> ?cmd put2?) the (-> ?obj noun-phrase) to (-> ?s block?))
-          ;  :=> (list 'move-to (? obj) (? s))
-          ;  )
-
           (((-> ?cmd put2?) the (-> ?obj block?) to (-> ?s block?))
             :=> (list 'move-to (? obj) (? s))
             )
 
-          (((-> ?cmd put2?) (-> ??obj1 noun-phrase) to (-> ??obj2 noun-phrase))
+          (((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?s stack?))
+            :=> (list 'put-at (? obj) (? s))
+            )
+          (((-> ?cmd put2?) (-> ??obj1 noun-phrase) on (-> ??obj2 noun-phrase))
             :=> (list (? cmd) (? obj1) (? obj2))
             )
           )
@@ -191,37 +183,37 @@
   ; (?x ?y -> ?z) becomes (??a ?x ?y ??b -> ??a ?z ??b)
   [rules]
   (with-mvars {'aa (gensym '??a), 'bb (gensym '??b)}
-    (mfor ['(??pre => ??post) rules]
-      (mout '((?aa ??pre ?bb) => (?aa ??post ?bb)))
-      )))
+              (mfor ['(??pre => ??post) rules]
+                    (mout '((?aa ??pre ?bb) => (?aa ??post ?bb)))
+                    )))
 
 
 (defn apply-morph-rules [rules sentence]
   (if (empty? rules) sentence
-    (mlet ['(?pre => ?post) (first rules)]
-      (mif [(? pre) sentence]
-        (recur rules (mout (? post)))
-        (recur (rest rules) sentence)
-        ))
-    ))
+                     (mlet ['(?pre => ?post) (first rules)]
+                           (mif [(? pre) sentence]
+                                (recur rules (mout (? post)))
+                                (recur (rest rules) sentence)
+                                ))
+                     ))
 
 
 (defn is-size? [x]
   (if-let [m (x lexicon)]
     (and (matches '(size ?_ ?_) (:sem m))
-      true)
+         true)
     ))
 
 
 (defn is-color? [x]
   (if-let [m (x lexicon)]
     (and (matches '(color ?_ ?_) (:sem m))
-      true)
+         true)
     ))
 
 
 (let [morph-rules (concat (compile-word-rules word-match-rules)
-                    sentence-morph-rules)]
+                          sentence-morph-rules)]
   (defn morph [sentence]
     (apply-morph-rules morph-rules sentence))
   )
@@ -243,7 +235,7 @@
     (= tree old)  new
 
     (seq? tree)   (cons (edit old new (first tree))
-                    (edit old new (rest tree)))
+                        (edit old new (rest tree)))
     :else
     tree
     ))
@@ -254,7 +246,7 @@
   (cond
     (id-type? np)                          ; NP is a block name
     (let [sem (edit '?y '?x                ; promote ?y (naieve semantics!!)
-                (edit '?x (:sem np) p))    ; name substitution
+                    (edit '?x (:sem np) p))    ; name substitution
           ]
       {:id '?x, :cat 'pp, :sem sem}
       )
@@ -262,8 +254,8 @@
     (tuple-type? np)                   ; NP is a set of tuples
     (let [sym (gensym '?x)
           sem (edit '?y '?x      ; promote ?y (naieve semantics!!)
-                (edit '?x sym    ; standard substitution
-                  (cons p (:sem np)) ))
+                    (edit '?x sym    ; standard substitution
+                          (cons p (:sem np)) ))
           ]
       {:id '?x, :cat 'pp, :sem sem}
       )
@@ -289,23 +281,23 @@
   (ui-out :comm 'finding spec)
   (if (= (:type spec) 'id)
     (do (ui-out :comm 'found (:sem spec))
-      (:sem spec))
+        (:sem spec))
     (let [vnam (symbol (subs (str (:id spec)) 1))  ;; strip-off "?"
-          obj (mfind* [(:sem spec) (:world-type settings)] (get mvars vnam))
+          obj (mfind* [(:sem spec) @block-data] (get mvars vnam))
           ]
       (ui-out :comm 'found obj)
       (if (nil? obj) (throw (Exception. (str "whoops- I cannot find a " spec))))
-    obj
-    )))
+      obj
+      )))
 
 (defn resolve-objs [spec]
   (map #(if (map? %) (find-obj %) %) spec))
 
 (defn check [tuples text]
-  (or (mfind* [tuples (:world-type settings)] true)
-    (do (ui-out :comm 'mishap text)
-      false
-      )))
+  (or (mfind* [tuples @block-data] true)
+      (do (ui-out :comm 'mishap text)
+          false
+          )))
 
 
 
@@ -321,59 +313,56 @@
 
 (defn apply-exec
   "like apply-op but uses selected matcher bindings & implicitly
-    applies to (:world-type settings)"
+    applies to @block-data"
   ([op] (apply-exec op {}))
   ([op bind]
-    (with-mvars bind
-      (mfind* [(:pre op) (:world-type settings)]
-        (let [op (mout op)]
-          (bd-del! (:del op))
-          (bd-add! (:add op))
-          (nlogo-send-exec (:cmd op))
-          (:txt op)
-          )))
+   (with-mvars bind
+               (mfind* [(:pre op) @block-data]
+                       (let [op (mout op)]
+                         (bd-del! (:del op))
+                         (bd-add! (:add op))
+                         (nlogo-send-exec (:cmd op))
+                         (:txt op)
+                         )))
     ))
 
 
 
 (defn goal [g]
   (ui-out :dbg 'goal g)
-  (ui-out :dbg (list g))
-  (ui-out (:world-type settings))
+  (println :stuff @block-data)
   (let [smap
         (cond
           (= (:search-type settings) :breadth-first)
-          (ops-search (:world-type settings) (list g) operations-prisoner)
-
-          ;(= (:search-type settings) :strips)
-          ;(strips-solver (:world-type settings) g goal-ops)
+          (ops-search @block-data (list g) operations-prisoner)
 
           :else
           (throw (new RuntimeException "unknown search type in settings"))
           )]
 
-  (if-not smap
-    ;; search failed
-    (do (ui-out :dbg "Help! - I cannot find a way to do this")
-      nil
-      )
-    ;; otherwise
-    (do
-      (ui-out :dbg 'solved...)
-      ; (ui-out :dbg smap)
-      (ui-out :dbg 'plan= (:txt smap))
-      (ui-out :dbg 'cmds= (:cmds smap))
-      (doseq [c (:cmds smap)]
-        (nlogo-send-exec c))
-      (bd-set! (:state smap))
-      (ui-set :bdat (:world-type settings))
-      )
-    )))
+    (if-not smap
+      ;; search failed
+      (do (ui-out :dbg "Help! - I cannot find a way to do this")
+          (ui-out :smap smap)
+          nil
+          )
+      ;; otherwise
+      (do
+        (ui-out :dbg 'solved...)
+        ; (ui-out :dbg smap)
+        (ui-out :dbg 'plan= (:txt smap))
+        (ui-out :dbg 'cmds= (:cmds smap))
+        (doseq [c (:cmds smap)]
+          (nlogo-send-exec c))
+        (bd-set! (:state smap))
+        (ui-set :bdat @block-data)
+        )
+      )))
 
 
 ;(defn goal [g]
 ;  (ui-out :dbg 'goal g)
-;  (if-let [smap (ops-search (:world-type settings) (list g) block-ops)]
+;  (if-let [smap (ops-search @block-data (list g) block-ops)]
 ;    (do
 ;      (ui-out :dbg 'solved...)
 ;      ; (ui-out :dbg smap)
@@ -382,7 +371,7 @@
 ;      (doseq [c (:cmds smap)]
 ;        (nlogo-send-exec c))
 ;      (bd-set! (:state smap))
-;      (ui-set :bdat (:world-type settings))
+;      (ui-set :bdat @block-data)
 ;      )
 ;    ; else - search failed
 ;    (do (ui-out :dbg "Help! - I cannot find a way to do this")
@@ -412,18 +401,18 @@
 
 (defn gen-stack-names [n]
   (map #(symbol (str/join (list "s" (str %))))
-    (range n)))
+       (range n)))
 
 
 
 (defn gen-stack-tuples [s-names]
   (into #{}
-    (reduce concat
-      (for [s s-names]
-        (with-mvars {'s s}
-          (mout '((stack ?s) (cleartop ?s) (at ?s ?s)))
-          )))
-    ))
+        (reduce concat
+                (for [s s-names]
+                  (with-mvars {'s s}
+                              (mout '((stack ?s) (cleartop ?s) (at ?s ?s)))
+                              )))
+        ))
 
 
 
@@ -439,35 +428,35 @@
   )
 
 
-;(def block-data (atom #{}))
+(def block-data (atom #{}))
 
 (defn bd-set! [data]
   (set-atom! block-data data))
 
 (defn bd-add! [tuples]
-  (set-atom! block-data (union (:world-type settings) (set tuples)))
+  (set-atom! block-data (union @block-data (set tuples)))
   )
 
 (defn bd-del! [tuples]
-  (set-atom! block-data (difference (:world-type settings) (set tuples))))
+  (set-atom! block-data (difference @block-data (set tuples))))
 
 
 (defn clear-block-data []
   (reset-block-numbering)
   (ui-out :dbg 'resetting 'block-data)
-  (set-atom! (:world-type settings) #{})
-  ;(bd-add! (gen-stack-tuples (gen-stack-names no-stacks)))
+  (set-atom! block-data #{})
+  (bd-add! (gen-stack-tuples (gen-stack-names no-stacks)))
   ;(bd-add! '#{(hand empty)})
-  (ui-set :bdat (:world-type settings))
-  (:world-type settings)
+  (ui-set :bdat @block-data)
+  @block-data
   )
 
 
 (defn get-held []
-  (mfind ['(holds ?x) (:world-type settings)] (? x)))
+  (mfind ['(holds ?x) @block-data] (? x)))
 
 
-(defn pbd [] (pprint (:world-type settings)))
+(defn pbd [] (pprint @block-data))
 
 
 ;================================
@@ -477,10 +466,10 @@
 (declare sentence- shrep-1)
 
 (defmatch sentence []
-  ((??s stop ??rest) :=> (sentence- (? s))
-                          (sentence (? rest)))
-  ( ?s  :=>  (sentence- (? s)))
-  )
+          ((??s stop ??rest) :=> (sentence- (? s))
+            (sentence (? rest)))
+          ( ?s  :=>  (sentence- (? s)))
+          )
 
 (defn sentence- [sentence]
   (ui-out :comm "I get:   " sentence)
@@ -491,7 +480,7 @@
         (ui-out :comm 'cmd cmd)
         (ui-out :dbg 'processing...)
         (process-cmd cmd)
-        (ui-set :bdat (:world-type settings)))
+        (ui-set :bdat @block-data))
       ;true
       )
     ;else
@@ -508,14 +497,16 @@
           ]
       (if (= in-list '(exit))
         (do (nlogo-send "stop")
-          'shrepl-exits)
+            'shrepl-exits)
         (do (shrep-1 in-list)
-          (recur))
-      ))))
+            (recur))
+        ))))
+
 
 (defn shrep-1 [in-list]
   (ui-broadcast "_________________\n")
   (ui-out :comm "I heard: " in-list)
+  (bd-set! (:world-type settings))
   (sentence (morph in-list))
   )
 
@@ -552,48 +543,48 @@
 
 (def sample-test
   '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on b1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then pick up b4
-     then put b1 on b4
-     then put b3 on s1
-     then put b4 on b3
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-     ))
+         then make a red block and put it on the blue box
+         then make a new yellow box
+         then put it on s2
+         then make an orange triangle and put it on b1
+         then make a brown ball and put it on b3
+         then put b2 on the ball
+         then pick up b4
+         then put b1 on b4
+         then put b3 on s1
+         then put b4 on b3
+         then make a box and put it on b1
+         then make a small pink box and put it on the grey box
+         ))
 
 
 (def els-test
   '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on s1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-     ))
+         then make a red block and put it on the blue box
+         then make a new yellow box
+         then put it on s2
+         then make an orange triangle and put it on s1
+         then make a brown ball and put it on b3
+         then put b2 on the ball
+         then make a box and put it on b1
+         then make a small pink box and put it on the grey box
+         ))
 
 (def video-prep
   '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on s1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-    then put b5 on s4 then put b4 on b5
-    then make a small green box and put it on b3
-    ;then do...
-    ; put b3 on the blue box then pick up the small pink box and put it on b3
-     ))
+         then make a red block and put it on the blue box
+         then make a new yellow box
+         then put it on s2
+         then make an orange triangle and put it on s1
+         then make a brown ball and put it on b3
+         then put b2 on the ball
+         then make a box and put it on b1
+         then make a small pink box and put it on the grey box
+         then put b5 on s4 then put b4 on b5
+         then make a small green box and put it on b3
+         ;then do...
+         ; put b3 on the blue box then pick up the small pink box and put it on b3
+         ))
 
 ;(shrep-1 els-test)
 ;(shrep-1 '(now put b2 on b1 and put b6 on b2))
@@ -606,4 +597,3 @@
       (shrep-1 '(put b7 on s4 then put b3 on b7))
       (shrep-1 '(put b7 on s2 then put b2 on b7))
       )))
-
