@@ -15,7 +15,7 @@
      (on pris cell)
      (isa pris prisoner)
 
-     (is A exit)
+     (isa A exit)
      (is cell locked)
 
      (at guard1 B)
@@ -30,10 +30,10 @@
   '#{
      (connects j7 c1) (connects c1 j7) (watched c1 false) (isa c1 location)
      (connects j7 c2) (connects c2 j7) (watched c2 false) (isa c2 location)
-     (connects c1 j2) (connects j2 c1) (watched c3 true) (isa c3 location)
-     (connects c2 j1) (connects j1 c2) (watched c4 false) (isa c4 location)
-     (connects j1 c4) (connects c4 j1) (watched c5 false) (isa c5 location)
-     (connects c4 j3) (connects j3 c4) (watched c6 true) (isa c6 location)
+     (connects c1 j2) (connects j2 c1) (watched c3 false) (isa c3 location)
+     (connects c2 j1) (connects j1 c2) (watched c4 true) (isa c4 location)
+     (connects j1 c4) (connects c4 j1) (watched c5 true) (isa c5 location)
+     (connects c4 j3) (connects j3 c4) (watched c6 false) (isa c6 location)
      (connects c3 j2) (connects j2 c3) (watched c7 false) (isa c7 location)
      (connects c3 j3) (connects j3 c3) (watched c8 false) (isa c8 location)
      (connects j3 c5) (connects c5 j3) (watched j1 false) (isa j1 location)
@@ -48,7 +48,7 @@
      (on pris cell)
      (isa pris prisoner)
 
-     (is j7 exit)
+     (isa j7 exit)
      (is cell locked)
 
      (at guard1 j1)

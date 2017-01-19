@@ -9,8 +9,8 @@
     :search-type :breadth-first
     ;:search-type :strips
 
-   :world-type world
-   ;:world-type nlogoworld
+   ;:world-type world
+   :world-type nlogoworld
    })
 
 
@@ -279,7 +279,8 @@
   ;((put-on ?x ?y)    :=> (set-atom! it-reference (? x))   (goal (mout '(on ?x ?y))))
   ;((put-at ?x ?s)    :=> (set-atom! it-reference (? x))   (goal (mout '(at ?x ?s))))
   ;((move-hand-to ?s) :=> (apply-exec ('puton exec-ops) (mout '{s ?s})))
-  ((move-to ?x ?y) :=> (set-atom! it-reference (? x)) (goal (mout '(on ?x ?y))))
+          ((move-to ?x ?y) :=> (set-atom! it-reference (? x)) (goal (mout '(on ?x ?y))))
+          ((exit-prison) :=> (goal (mout '(escaped pris true))))
   ;((create ?x ?spec) :=>
   ;  (goal '(hand empty))
   ;  (set-atom! it-reference (? x))

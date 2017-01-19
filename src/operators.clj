@@ -48,7 +48,7 @@
                        }
     exit              {:pre ((has pris key)
                               (on pris ?junction)
-                              (is ?junction exit)
+                              (isa ?junction exit)
                               (escaped pris false)
                               )
                        :add ((escaped pris true))

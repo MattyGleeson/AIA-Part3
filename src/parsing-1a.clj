@@ -28,7 +28,6 @@
   '{
     guard {:cat noun, :sem (isa ?p guard)}
     prisoner  {:cat noun, :sem (isa ?x prisoner)}
-    exit      {:cat noun, :sem (isa ?x exit)}
     location  {:cat noun, :sem (isa ?x location)}
 
     the    {:cat det} ;, :sem undef}
@@ -49,8 +48,9 @@
     create  {:cat make, :arity 1, :sem make}
 
     place   {:cat put2, :arity 2, :sem put-on}
-    move    {:cat put2, :arity 2, :sem put-on}
+    move    {:cat put2, :arity 2, :sem move-to}
     put     {:cat put2, :arity 2, :sem put-on}
+    exit    {:cat put2, :sem exit-prison}
     })
 
 
@@ -161,11 +161,17 @@
             )
 
           (((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?s stack?))
-            :=> (list 'put-at (? obj) (? s))
+            :=> (list 'move-to (? obj) (? s))
             )
           (((-> ?cmd put2?) (-> ??obj1 noun-phrase) on (-> ??obj2 noun-phrase))
             :=> (list (? cmd) (? obj1) (? obj2))
             )
+
+          (((-> ?cmd put2?))
+            :=> (list (? cmd))
+            )
+
+
           )
 
 
