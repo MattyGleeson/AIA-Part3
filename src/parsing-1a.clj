@@ -27,30 +27,31 @@
 (def lexicon
   '{
     guard {:cat noun, :sem (isa ?p guard)}
-    prisoner  {:cat noun, :sem (isa ?x prisoner)}
+    pris  {:cat noun, :sem (isa ?x prisoner)}
     location  {:cat noun, :sem (isa ?x location)}
+    key       {:cat noun, :sem (isa ?x k)}
+    cell      {:cat noun, :sem (isa ?x cell)}
 
     the    {:cat det} ;, :sem undef}
     a      {:cat det} ;, :sem undef}
     an     {:cat det}
     any    {:cat det}
 
-    on      {:cat prep, :sem (on ?y ?x)}
-    under   {:cat prep, :sem (on ?x ?y)}
+    grasp   {:cat verb1, :arity 1, :sem get-key}
+    find    {:cat verb1, :arity 1, :sem get-key}
+    get     {:cat verb1, :arity 1, :sem get-key}
+    unlock  {:cat verb1, :arity 1, :sem unlock}
 
-    grasp   {:cat verb1, :arity 1, :sem grasp}
-    find    {:cat verb1, :arity 1, :sem grasp}
+    ;remove  {:cat verb1, :arity 1, :sem destroy}
+    ;destroy {:cat verb1, :arity 1, :sem destroy}
+    ;
+    ;make    {:cat make, :arity 1, :sem make}
+    ;create  {:cat make, :arity 1, :sem make}
 
-    remove  {:cat verb1, :arity 1, :sem destroy}
-    destroy {:cat verb1, :arity 1, :sem destroy}
-
-    make    {:cat make, :arity 1, :sem make}
-    create  {:cat make, :arity 1, :sem make}
-
-    place   {:cat put2, :arity 2, :sem put-on}
+    place   {:cat put2, :arity 2, :sem move-to}
     move    {:cat put2, :arity 2, :sem move-to}
-    put     {:cat put2, :arity 2, :sem put-on}
-    exit    {:cat put2, :sem exit-prison}
+    put     {:cat put2, :arity 2, :sem move-to}
+    exit    {:cat exit, :sem exit-prison}
     })
 
 
@@ -72,6 +73,7 @@
 (defn verb1? [x] (word-check 'verb1 x))  ;; verb with arity 1
 (defn put2?  [x] (word-check 'put2 x))   ;; verb with arity 1
 (defn make?  [x] (word-check 'make x))
+(defn exit?  [x] (word-check 'exit x))
 
 ;___ world context predicates ______________
 
@@ -145,29 +147,29 @@
 ; this is the top level phrase
 
 (defmatch parse []
-          (((-> ?cmd verb1?) (-> ??obj noun-phrase))
+          (((-> ?cmd verb1?) (-> ??obj noun-group))
             :=> (list (? cmd) (? obj))
             )
-          (((-> ?cmd make?) (-> ??obj noun-group))
-            :=> (let [obj (? obj)
-                      id  (gen-block-name)
-                      ]
-                  (list 'create id
-                        (edit (:id obj) id (:sem obj))))
-            )
+          ;(((-> ?cmd make?) (-> ??obj noun-group))
+          ;  :=> (let [obj (? obj)
+          ;            id  (gen-block-name)
+          ;            ]
+          ;        (list 'create id
+          ;              (edit (:id obj) id (:sem obj))))
+          ;  )
 
-          (((-> ?cmd put2?) the (-> ?obj block?) to (-> ?s block?))
+          (((-> ?cmd put2?) (-> ??obj noun-group) to (-> ?s block?))
             :=> (list 'move-to (? obj) (? s))
             )
 
-          (((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?s stack?))
-            :=> (list 'move-to (? obj) (? s))
-            )
-          (((-> ?cmd put2?) (-> ??obj1 noun-phrase) on (-> ??obj2 noun-phrase))
-            :=> (list (? cmd) (? obj1) (? obj2))
-            )
+          ;(((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?s stack?))
+          ;  :=> (list 'move-to (? obj) (? s))
+          ;  )
+          ;(((-> ?cmd put2?) (-> ??obj1 noun-phrase) on (-> ??obj2 noun-phrase))
+          ;  :=> (list (? cmd) (? obj1) (? obj2))
+          ;  )
 
-          (((-> ?cmd put2?))
+          (((-> ?cmd exit?))
             :=> (list (? cmd))
             )
 
@@ -510,11 +512,27 @@
 
 
 (defn shrep-1 [in-list]
+  (println :out (type in-list))
+
+  (let [cmd in-list]
+    (ui-out :comm (type cmd))
+    )
+
   (ui-broadcast "_________________\n")
   (ui-out :comm "I heard: " in-list)
   (bd-set! (:world-type settings))
   (sentence (morph in-list))
   )
+
+;(defn shrep-1-nlogo [in-list]
+;  (with-local-vars [dg])
+;  (ui-broadcast "_________________\n")
+;  (ui-out :comm "I heard: " in-list)
+;  (bd-set! (:world-type settings))
+;
+;  (var-set dg "get the key")
+;  (var-set dg ())
+;  )
 
 ;(defn shrep-1 [in-list]
 ;  (ui-broadcast "_________________\n")

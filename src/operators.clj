@@ -23,17 +23,17 @@
                        :pre ((on pris ?p1)
                               (connects ?p1 ?p2)
                               (watched ?p2 false)
-                              (is cell unlocked))
+                              (unlocked cell))
                        :add ((on pris ?p2))
                        :del ((on pris ?p1))
                        :txt (prisoner moved from ?p1 to ?p2)
                        :cmd [move-junction ?p2]
                        }
     unlock            {:pre ((on pris cell)
-                              (is cell locked)
+                              (locked cell)
                               )
-                       :add ((is cell unlocked))
-                       :del ((is cell locked))
+                       :add ((unlocked cell))
+                       :del ((locked cell))
                        :txt (unlocked cell)
                        :cmd [unlock-cell]
                        }
