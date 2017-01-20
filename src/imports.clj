@@ -19,6 +19,16 @@
   (apply println r))
 
 
+
+(defn wait-for-input []
+    (while true
+      (do
+        (Thread/sleep 1000)
+        (let [in  ])
+        (shrep-1 (symbol (nlogo-read)))
+        ))
+  )
+
 ;;Examples of sentences to parse
 
 ;;(shrep-1 '(move the pris to H))

@@ -9,8 +9,8 @@
     :search-type :breadth-first
     ;:search-type :strips
 
-   ;:world-type world
-   :world-type nlogoworld
+   :world-type world
+   ;:world-type nlogoworld
    })
 
 
