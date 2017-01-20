@@ -24,7 +24,7 @@
     (while true
       (do
         (Thread/sleep 1000)
-        (shrep-1 (symbol (nlogo-read)))
+        (shrep-1 (reverse (map symbol (into () (str/split (nlogo-read) #" ")))))
         ))
   )
 
