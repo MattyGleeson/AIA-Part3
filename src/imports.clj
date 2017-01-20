@@ -24,7 +24,6 @@
     (while true
       (do
         (Thread/sleep 1000)
-        (let [in  ])
         (shrep-1 (symbol (nlogo-read)))
         ))
   )
