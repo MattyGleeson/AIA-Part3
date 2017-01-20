@@ -16,13 +16,14 @@
      (isa pris prisoner)
 
      (isa A exit)
-     (is cell locked)
+     (locked cell)
+     (isa cell cell)
 
      (at guard1 B)
      (isa guard1 guard)
      (has guard1 key)
+     (isa key k)
 
-     (locked door false)
      (escaped pris false)
      })
 
@@ -49,13 +50,14 @@
      (isa pris prisoner)
 
      (isa j7 exit)
-     (is cell locked)
+     (locked cell)
+     (isa cell cell)
 
      (at guard1 j1)
      (isa guard1 guard)
      (has guard1 key)
+     (isa k key)
 
-     (locked door false)
      (escaped pris false)
      }
   )
