@@ -102,13 +102,6 @@
           (((-> ?cmd verb1?) (-> ??obj noun-group))
             :=> (list (? cmd) (? obj))
             )
-          ;(((-> ?cmd make?) (-> ??obj noun-group))
-          ;  :=> (let [obj (? obj)
-          ;            id  (gen-block-name)
-          ;            ]
-          ;        (list 'create id
-          ;              (edit (:id obj) id (:sem obj))))
-          ;  )
 
           (((-> ?cmd put2?) (-> ??obj noun-group) to (-> ?s location?))
             :=> (list 'move-to (? obj) (? s))
@@ -125,6 +118,5 @@
           (((-> ?cmd exit?) (-> ??obj noun-group))
             :=> (list (? cmd))
             )
-
 
           )
