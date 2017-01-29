@@ -33,6 +33,8 @@
 
     exit    {:cat exit, :sem exit-prison}
     leave {:cat exit, :sem exit-prison}
+    escape {:cat exit, :sem exit-prison}
+
     })
 
 ;___ noun group ___________________________
@@ -67,7 +69,7 @@
 
 (defmatch noun-phrase []
           (((-> ??np noun-group)) :=> (assoc (? np) :cat 'np))   ; NP -> NG
-          (((-> ?obj block?))                                    ; NP -> block
+          (((-> ?obj location?))                                    ; NP -> block
             :=> {:cat 'np, :type 'id :sem  (? obj)}
             )
           (((-> ?obj #(= % 'it)))                 ; NP -> block
@@ -108,11 +110,11 @@
           ;              (edit (:id obj) id (:sem obj))))
           ;  )
 
-          (((-> ?cmd put2?) (-> ??obj noun-group) to (-> ?s block?))
+          (((-> ?cmd put2?) (-> ??obj noun-group) to (-> ?s location?))
             :=> (list 'move-to (? obj) (? s))
             )
 
-          (((-> ?cmd put2?) (-> ??obj noun-group) on (-> ?s block?))
+          (((-> ?cmd put2?) (-> ??obj noun-group) on (-> ?s location?))
             :=> (list 'move-to (? obj) (? s))
             )
 

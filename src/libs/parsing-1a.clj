@@ -39,7 +39,7 @@
 ;___ world context predicates ______________
 
 (defn stack? [x] (mfind [`(~'stack ~x) @block-data] true))
-(defn block? [x] (mfind [`(~'isa ~x ~'?_) @block-data] true))
+(defn location? [x] (mfind [`(~'isa ~x ~'?_) @block-data] true))
 
 (defn id-type? [x]    (and (map? x) (= (:type x) 'id)))
 (defn tuple-type? [x] (and (map? x) (= (:type x) 'tuples)))
