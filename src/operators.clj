@@ -20,16 +20,16 @@
 (def operations-prisoner
   '{
     move              {
-                       :pre ((on pris ?p1)
+                       :pre ((on prisoner ?p1)
                               (connects ?p1 ?p2)
                               (watched ?p2 false)
                               (unlocked cell))
-                       :add ((on pris ?p2))
-                       :del ((on pris ?p1))
+                       :add ((on prisoner ?p2))
+                       :del ((on prisoner ?p1))
                        :txt (prisoner moved from ?p1 to ?p2)
                        :cmd [move-junction ?p2]
                        }
-    unlock            {:pre ((on pris cell)
+    unlock            {:pre ((on prisoner cell)
                               (locked cell)
                               )
                        :add ((unlocked cell))
@@ -37,22 +37,22 @@
                        :txt (unlocked cell)
                        :cmd [unlock-cell]
                        }
-    get-key           {:pre ((on pris ?junction)
+    get-key           {:pre ((on prisoner ?junction)
                               (at ?guard ?junction)
                               (has ?guard key)
                               )
-                       :add ((has pris key))
+                       :add ((has prisoner key))
                        :del ((has ?guard key))
                        :txt (key found at ?junction)
                        :cmd [get-key]
                        }
-    exit              {:pre ((has pris key)
-                              (on pris ?junction)
+    exit              {:pre ((has prisoner key)
+                              (on prisoner ?junction)
                               (isa ?junction exit)
-                              (escaped pris false)
+                              (escaped prisoner false)
                               )
-                       :add ((escaped pris true))
-                       :del ((escaped pris false))
+                       :add ((escaped prisoner true))
+                       :del ((escaped prisoner false))
                        :txt (prisoner escaped)
                        :cmd [exit-prison]                   ;changed from exit to exit-prison. scared of conflicts
                        }

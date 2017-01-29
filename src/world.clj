@@ -12,8 +12,8 @@
      (connects F D) (connects D F) (watched G false) (isa G location)
      (connects D A) (connects A D) (watched H false) (isa H location)
      (connects cell H) (connects H cell)
-     (on pris cell)
-     (isa pris prisoner)
+     (on prisoner cell)
+     (isa prisoner prisoner)
 
      (isa A exit)
      (locked cell)
@@ -24,7 +24,7 @@
      (has guard1 key)
      (isa key k)
 
-     (escaped pris false)
+     (escaped prisoner false)
      })
 
 (def nlogoworld
@@ -46,8 +46,8 @@
      (connects c8 j5) (connects j5 c8) (watched j7 false) (isa j7 location)
      (connects j5 c6) (connects c6 j5)
      (connects cell j6) (connects j6 cell)
-     (on pris cell)
-     (isa pris prisoner)
+     (on prisoner cell)
+     (isa prisoner prisoner)
 
      (isa j7 exit)
      (locked cell)
@@ -58,6 +58,6 @@
      (has guard1 key)
      (isa k key)
 
-     (escaped pris false)
+     (escaped prisoner false)
      }
   )

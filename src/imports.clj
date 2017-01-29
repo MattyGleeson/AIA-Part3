@@ -1,15 +1,15 @@
 (defn ui-out [& r]
   (apply println r))
 
-(load "matcher(0.0m)")
-(load "ops-search(1b)")
-;(load "strips-search-1a")
-(load "socket")
+(load "libs/matcher(0.0m)")
+(load "libs/ops-search(1b)")
+(load "libs/socket")
 (load "operators")
 (load "world")
-(load "definitions(1c)")
-(load "parsing-1a")
-(load "wrappers-1a")
+(load "libs/definitions(1c)")
+(load "libs/parsing-1a")
+(load "libs/wrappers-1a")
+(load "parser")
 
 (defn startup [port]
   (set-shrdlu-comms port)
@@ -17,8 +17,6 @@
 
 (defn ui-out [& r]
   (apply println r))
-
-
 
 (defn wait-for-input []
     (while true
